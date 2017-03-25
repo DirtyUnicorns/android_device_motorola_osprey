@@ -72,11 +72,28 @@ service akmd09912 /system/bin/akmd09912
     user compass
     group compass misc input
 
+# Start UnicornBlood changes
+# Many of these tweaks are thanks to AK, Franco,Nathan Chancellor & frap129.
+
 on property:sys.boot_completed=1
     setprop sys.io.scheduler maple
     write /sys/block/mmcblk0/queue/read_ahead_kb 512
-    write /sys/class/devfreq/1c00000.qcom,kgsl-3d0/governor "msm-adreno-tz"
-    write /sys/class/devfreq/qcom,cpubw.30/governor "cpufreq"
+    write /sys/devices/soc.0/1c00000.qcom,kgsl-3d0/devfreq/1c00000.qcom,kgsl-3d0/governor msm-adreno-tz
+    write /sys/module/lpm_levels/parameters/sleep_disabled 0
+    write /sys/devices/system/cpu/cpu0/online 1
+
+    # Re-enable retention idle state
+    write /sys/module/lpm_levels/system/cpu0/retention/idle_enabled 1
+    write /sys/module/lpm_levels/system/cpu1/retention/idle_enabled 1
+    write /sys/module/lpm_levels/system/cpu2/retention/idle_enabled 1
+    write /sys/module/lpm_levels/system/cpu3/retention/idle_enabled 1
+    write /sys/module/lpm_levels/system/l2-retention/idle_enabled 1
+
+    # Disable some Wlan wakelocks
+    write /sys/module/wakeup/parameters/enable_wlan_rx_wake_ws 0
+    write /sys/module/wakeup/parameters/enable_wlan_ctrl_wake_ws 0
+    write /sys/module/wakeup/parameters/enable_wlan_wake_ws 0
+    write /sys/module/wakeup/parameters/enable_ipa_ws 0
 
     # update foreground cpuset now that processors are up
     # foreground gets all CPUs except CPU 3
@@ -102,12 +119,65 @@ on property:sys.boot_completed=1
 
     start batt_health
 
-    # Chill Gov
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor chill
-    chown system system /sys/devices/system/cpu/cpufreq/chill/sampling_rate
-    chmod 0644 /sys/devices/system/cpu/cpufreq/chill/sampling_rate
-    write /sys/devices/system/cpu/cpufreq/chill/sampling_rate 50000
-    chmod 0444 /sys/devices/system/cpu/cpufreq/chill/sampling_rate
+    # Initialize frequency hardlimits
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq_hardlimit
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq_hardlimit
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq_hardlimit 200000
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq_hardlimit
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq_hardlimit
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq_hardlimit 1363200
 
+    # Tune Governors: Relaxed on LITTLE, Chill on big
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor chill
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 200000
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1363000
+    write /sys/module/cpu_boost/parameters/input_boost_enabled 1
+    write /sys/module/cpu_boost/parameters/input_boost_freq 0:800000 1:800000 2:800000 3:800000
+    write /sys/module/cpu_boost/parameters/boost_ms 0
+    write /sys/module/cpu_boost/parameters/input_boost_ms 40
+    write /sys/module/cpu_boost/parameters/migration_load_threshold 15
+    write /sys/module/cpu_boost/parameters/sync_threshold 0
+    write /sys/module/msm_performance/parameters/touchboost 0
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/boost_count
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/boost_count
+    write /sys/devices/system/cpu/cpu0/cpufreq/chill/boost_count 10
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/boost_count
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/freq_step
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/freq_step
+    write /sys/devices/system/cpu/cpu0/cpufreq/chill/freq_step 4
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/freq_step
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold
+    write /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold 75
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold_suspended
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold_suspened
+    write /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold_suspended 95 
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold_suspened
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/up_threshold
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/up_threshold
+    write /sys/devices/system/cpu/cpu0/cpufreq/chill/up_threshold 90
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/up_threshold
+
+    # Set I/O Scheduler tweaks
+    write /sys/block/mmcblk0/queue/scheduler maple
+    write /sys/block/mmcblk0/queue/read_ahead_kb 512
+    write /sys/block/mmcblk0/queue/iosched/writes_starved 4
+    write /sys/block/mmcblk0/queue/iosched/fifo_batch 16
+    write /sys/block/mmcblk0/queue/iosched/sync_read_expire 350
+    write /sys/block/mmcblk0/queue/iosched/sync_write_expire 550
+    write /sys/block/mmcblk0/queue/iosched/async_read_expire 250
+    write /sys/block/mmcblk0/queue/iosched/async_write_expire 450
+    write /sys/block/mmcblk0/queue/iosched/sleep_latency_multiple 10
+
+    # configure hotplug
+    write /sys/module/cluster_plug/parameters/load_threshold_down 40
+    write /sys/module/cluster_plug/parameters/load_threshold_up 80
+    write /sys/module/cluster_plug/parameters/vote_threshold_down 6
+    write /sys/module/cluster_plug/parameters/vote_threshold_up 2
+    write /sys/module/cluster_plug/parameters/sampling_time 80
+
+
+    # LMK
     write /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk 1
     write /sys/module/lowmemorykiller/parameters/vmpressure_file_min 49152
