@@ -127,8 +127,8 @@ on property:sys.boot_completed=1
     chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq_hardlimit
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq_hardlimit 1363200
 
-    # Tune Governors: Relaxed on LITTLE, Chill on big
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor chill
+    # Tune Governors: interactive
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 200000
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1363000
     write /sys/module/cpu_boost/parameters/input_boost_enabled 1
@@ -138,26 +138,26 @@ on property:sys.boot_completed=1
     write /sys/module/cpu_boost/parameters/migration_load_threshold 15
     write /sys/module/cpu_boost/parameters/sync_threshold 0
     write /sys/module/msm_performance/parameters/touchboost 0
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/boost_count
-    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/boost_count
-    write /sys/devices/system/cpu/cpu0/cpufreq/chill/boost_count 10
-    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/boost_count
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/freq_step
-    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/freq_step
-    write /sys/devices/system/cpu/cpu0/cpufreq/chill/freq_step 4
-    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/freq_step
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold
-    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold
-    write /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold 75
-    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold_suspended
-    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold_suspened
-    write /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold_suspended 95 
-    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/down_threshold_suspened
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/chill/up_threshold
-    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/chill/up_threshold
-    write /sys/devices/system/cpu/cpu0/cpufreq/chill/up_threshold 90
-    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/chill/up_threshold
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/boost_count
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/interactive/boost_count
+    write /sys/devices/system/cpu/cpu0/cpufreq/interactive/boost_count 10
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/interactive/boost_count
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/freq_step
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/interactive/freq_step
+    write /sys/devices/system/cpu/cpu0/cpufreq/interactive/freq_step 4
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/interactive/freq_step
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/down_threshold
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/interactive/down_threshold
+    write /sys/devices/system/cpu/cpu0/cpufreq/interactive/down_threshold 75
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/interactive/down_threshold
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/down_threshold_suspended
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/interactive/down_threshold_suspened
+    write /sys/devices/system/cpu/cpu0/cpufreq/interactive/down_threshold_suspended 95
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/interactive/down_threshold_suspened
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/up_threshold
+    chmod 0644 /sys/devices/system/cpu/cpu0/cpufreq/interactive/up_threshold
+    write /sys/devices/system/cpu/cpu0/cpufreq/interactive/up_threshold 90
+    chmod 0444 /sys/devices/system/cpu/cpu0/cpufreq/interactive/up_threshold
 
     # Set I/O Scheduler tweaks
     write /sys/block/mmcblk0/queue/scheduler maple
@@ -176,7 +176,6 @@ on property:sys.boot_completed=1
     write /sys/module/cluster_plug/parameters/vote_threshold_down 6
     write /sys/module/cluster_plug/parameters/vote_threshold_up 2
     write /sys/module/cluster_plug/parameters/sampling_time 80
-
 
     # LMK
     write /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk 1
